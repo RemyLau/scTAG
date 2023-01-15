@@ -1,12 +1,12 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-import utils as utils
+from __future__ import absolute_import, division, print_function
+
 import h5py
-import scipy as sp
 import numpy as np
-import scanpy as sc
 import pandas as pd
+import scanpy as sc
+import scipy as sp
+
+import utils as utils
 
 
 def read_clean(data):
@@ -30,16 +30,16 @@ def dict_from_group(group):
     return d
 
 
-def read_data(filename, sparsify = False, skip_exprs = False):
+def read_data(filename, sparsify=False, skip_exprs=False):
     with h5py.File(filename, "r") as f:
-        obs = pd.DataFrame(dict_from_group(f["obs"]), index = utils.decode(f["obs_names"][...]))
-        var = pd.DataFrame(dict_from_group(f["var"]), index = utils.decode(f["var_names"][...]))
+        obs = pd.DataFrame(dict_from_group(f["obs"]), index=utils.decode(f["obs_names"][...]))
+        var = pd.DataFrame(dict_from_group(f["var"]), index=utils.decode(f["var_names"][...]))
         uns = dict_from_group(f["uns"])
         if not skip_exprs:
             exprs_handle = f["exprs"]
             if isinstance(exprs_handle, h5py.Group):
                 mat = sp.sparse.csr_matrix((exprs_handle["data"][...], exprs_handle["indices"][...],
-                                               exprs_handle["indptr"][...]), shape = exprs_handle["shape"][...])
+                                           exprs_handle["indptr"][...]), shape=exprs_handle["shape"][...])
             else:
                 mat = exprs_handle[...].astype(np.float32)
                 if sparsify:
@@ -60,7 +60,9 @@ def prepro(filename):
     cell_type, cell_label = np.unique(cell_name, return_inverse=True)
     return X, cell_label
 
-def normalize(adata, copy=True, highly_genes = None, filter_min_counts=True, size_factors=True, normalize_input=True, logtrans_input=True):
+
+def normalize(adata, copy=True, highly_genes=None, filter_min_counts=True,
+              size_factors=True, normalize_input=True, logtrans_input=True):
     if isinstance(adata, sc.AnnData):
         if copy:
             adata = adata.copy()
@@ -70,7 +72,7 @@ def normalize(adata, copy=True, highly_genes = None, filter_min_counts=True, siz
         raise NotImplementedError
     norm_error = 'Make sure that the dataset (adata.X) contains unnormalized count data.'
     assert 'n_count' not in adata.obs, norm_error
-    if adata.X.size < 50e6: # check if adata.X is integer only if array is small
+    if adata.X.size < 50e6:  # check if adata.X is integer only if array is small
         if sp.sparse.issparse(adata.X):
             assert (adata.X.astype(int) != adata.X).nnz == 0, norm_error
         else:
@@ -90,9 +92,9 @@ def normalize(adata, copy=True, highly_genes = None, filter_min_counts=True, siz
         adata.obs['size_factors'] = 1.0
     if logtrans_input:
         sc.pp.log1p(adata)
-    if highly_genes != None:
-        sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5, n_top_genes = highly_genes, subset=True)
+    if highly_genes is not None:
+        sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5,
+                                    n_top_genes=highly_genes, subset=True)
     if normalize_input:
         sc.pp.scale(adata)
     return adata
-

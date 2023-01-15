@@ -1,15 +1,14 @@
 import numpy as np
-# import tensorflow as tf
 import tensorflow.compat.v1 as tf
-# from keras import backend as K
-import tensorflow.keras.backend as K
 
 
 def _nan2zero(x):
     return tf.where(tf.is_nan(x), tf.zeros_like(x), x)
 
+
 def _nan2inf(x):
     return tf.where(tf.is_nan(x), tf.zeros_like(x)+np.inf, x)
+
 
 def _nelem(x):
     nelem = tf.reduce_sum(tf.cast(~tf.is_nan(x), tf.float32))
@@ -36,7 +35,6 @@ def poisson_loss(y_true, y_pred):
     ret = y_pred - y_true*tf.log(y_pred+1e-10) + tf.lgamma(y_true+1.0)
 
     return tf.divide(tf.reduce_sum(ret), nelem)
-
 
 
 class NB(object):
@@ -67,7 +65,8 @@ class NB(object):
             theta = tf.minimum(self.theta, 1e6)
 
             t1 = tf.lgamma(theta+eps) + tf.lgamma(y_true+1.0) - tf.lgamma(y_true+theta+eps)
-            t2 = (theta+y_true) * tf.log(1.0 + (y_pred/(theta+eps))) + (y_true * (tf.log(theta+eps) - tf.log(y_pred+eps)))
+            t2 = ((theta+y_true) * tf.log(1.0 + (y_pred/(theta+eps)))
+                  + (y_true * (tf.log(theta+eps) - tf.log(y_pred+eps))))
 
             if self.debug:
                 assert_ops = [
@@ -92,8 +91,8 @@ class NB(object):
                 else:
                     final = tf.reduce_mean(final)
 
-
         return final
+
 
 class ZINB(NB):
     def __init__(self, pi, ridge_lambda=0.0, scope='zinb_loss/', **kwargs):
@@ -137,12 +136,14 @@ class ZINB(NB):
 
         return result
 
-def dist_loss(data, min_dist, max_dist = 20):
+
+def dist_loss(data, min_dist, max_dist=20):
     pairwise_dist = cdisttf(data, data)
     dist = pairwise_dist - min_dist
     bigdist = max_dist - pairwise_dist
     loss = tf.math.exp(-dist) + tf.math.exp(-bigdist)
     return loss
+
 
 def cdisttf(data_1, data_2):
     prod = tf.math.reduce_sum(

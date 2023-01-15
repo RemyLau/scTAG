@@ -1,10 +1,9 @@
 import numpy as np
-import pandas as pd
 from scipy import sparse as sp
 from sklearn.neighbors import kneighbors_graph
+
 from utils import dopca
-import scanpy as sc
-from anndata import AnnData
+
 
 def get_adj(count, k=15, pca=50, mode="connectivity"):
     if pca:
@@ -31,5 +30,3 @@ def norm_adj(A):
     normalized_D = degree_power(A, -0.5)
     output = normalized_D.dot(A).dot(normalized_D)
     return output
-
-

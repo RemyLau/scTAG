@@ -1,12 +1,14 @@
-import json
-import functools
-import operator
 import collections
+import functools
+import json
+import operator
+
 import jgraph
 import numpy as np
 import scipy.sparse
 import tqdm
 from sklearn.decomposition import PCA
+
 
 class dotdict(dict):
     __getattr__ = dict.get
@@ -295,10 +297,12 @@ def empty_safe(fn, dtype):
         return x.astype(dtype)
     return _fn
 
+
 def dopca(X, dim=10):
     pcaten = PCA(n_components=dim)
     X_10 = pcaten.fit_transform(X)
     return X_10
+
 
 decode = empty_safe(np.vectorize(lambda _x: _x.decode("utf-8")), str)
 encode = empty_safe(np.vectorize(lambda _x: str(_x).encode("utf-8")), "S")

@@ -1,19 +1,23 @@
-import tensorflow.keras.backend as K
-from tensorflow.keras.models import Model
-from tensorflow.keras.losses import MSE, KLD
-from tensorflow.keras.layers import Dense, Dropout, Input, Lambda
-from spektral.layers import GraphAttention, GraphConvSkip, TAGConv
-from tensorflow.keras.initializers import GlorotUniform
-from layers import *
-import tensorflow_probability as tfp
 import numpy as np
-from sklearn import metrics
-from loss import poisson_loss, NB, ZINB, dist_loss
+import tensorflow as tf
+import tensorflow.keras.backend as K
+import tensorflow_probability as tfp
+from spektral.layers import TAGConv
+from tensorflow.keras.initializers import GlorotUniform
+from tensorflow.keras.layers import Dense, Dropout, Input, Lambda
+from tensorflow.keras.losses import KLD, MSE
+from tensorflow.keras.models import Model
+
+from layers import Bilinear, ClusteringLayer
+from loss import ZINB, dist_loss
 
 
+def MeanAct(x):
+    return tf.clip_by_value(K.exp(x), 1e-5, 1e6)
 
-MeanAct = lambda x: tf.clip_by_value(K.exp(x), 1e-5, 1e6)
-DispAct = lambda x: tf.clip_by_value(tf.nn.softplus(x), 1e-4, 1e4)
+
+def DispAct(x):
+    return tf.clip_by_value(tf.nn.softplus(x), 1e-4, 1e4)
 
 
 class SCTAG(tf.keras.Model):
@@ -22,7 +26,7 @@ class SCTAG(tf.keras.Model):
         super(SCTAG, self).__init__()
         if dec_dim is None:
             dec_dim = [128, 256, 512]
-            #dec_dim = [128, 256]
+            # dec_dim = [128, 256]
         self.latent_dim = latent_dim
         self.X = X
         self.adj = np.float32(adj)
@@ -36,7 +40,7 @@ class SCTAG(tf.keras.Model):
         # Encoder
         X_input = Input(shape=self.in_dim)
         h = Dropout(0.2)(X_input)
-      
+
         self.sparse = True
         A_in = Input(shape=self.n_sample, sparse=True)
         h = TAGConv(channels=hidden_dim, kernel_initializer=initializer, activation="relu")([h, A_in])
@@ -47,34 +51,28 @@ class SCTAG(tf.keras.Model):
         self.cluster_model = Model(inputs=[X_input, A_in], outputs=clustering_layer, name="cluster_encoder")
 
         # Adjacency matrix decoder
-        
         dec_in = Input(shape=latent_dim)
         h = Dense(units=adj_dim, activation=None)(dec_in)
         h = Bilinear()(h)
         dec_out = Lambda(lambda z: tf.nn.sigmoid(z))(h)
         self.decoderA = Model(inputs=dec_in, outputs=dec_out, name="decoder1")
-        
 
         # Expression matrix decoder
-
         decx_in = Input(shape=latent_dim)
         h = Dense(units=dec_dim[0], activation="relu")(decx_in)
         h = Dense(units=dec_dim[1], activation="relu")(h)
         h = Dense(units=dec_dim[2], activation="relu")(h)
 
         pi = Dense(units=self.in_dim, activation='sigmoid', kernel_initializer='glorot_uniform', name='pi')(h)
-
         disp = Dense(units=self.in_dim, activation=DispAct, kernel_initializer='glorot_uniform', name='dispersion')(h)
-
         mean = Dense(units=self.in_dim, activation=MeanAct, kernel_initializer='glorot_uniform', name='mean')(h)
 
         # decx_out = Dense(units=self.in_dim)(h)
         self.decoderX = Model(inputs=decx_in, outputs=[pi, disp, mean], name="decoderX")
 
     def pre_train(self, epochs=1000, info_step=10, lr=1e-4, W_a=0.3, W_x=1, W_d=0, min_dist=0.5, max_dist=20):
-      
         optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
-        if self.sparse == True:
+        if self.sparse is True:
             self.adj_n = tfp.math.dense_to_sparse(self.adj_n)
 
         # Training

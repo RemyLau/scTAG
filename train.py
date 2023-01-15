@@ -16,7 +16,7 @@ seed(1)
 tf.random.set_seed(1)
 
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
@@ -62,12 +62,12 @@ if __name__ == "__main__":
 
     # Load data
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_option
-    x, y = prepro('./data/' + args.dataname + '/data.h5')
+    x, y = prepro("./data/" + args.dataname + "/data.h5")
 
     x = np.ceil(x).astype(np.int)
     cluster_number = int(max(y) - min(y) + 1)
     adata = sc.AnnData(x)
-    adata.obs['Group'] = y
+    adata.obs["Group"] = y
     adata = normalize(adata, copy=True, highly_genes=args.highly_genes, size_factors=True,
                       normalize_input=True, logtrans_input=True)
     count = adata.X
@@ -93,4 +93,4 @@ if __name__ == "__main__":
         Cluster_predicted.y_pred = np.array(Cluster_predicted.y_pred)
         nmi = np.round(metrics.normalized_mutual_info_score(y, Cluster_predicted.y_pred), 5)
         ari = np.round(metrics.adjusted_rand_score(y, Cluster_predicted.y_pred), 5)
-        print('ACC= %.4f, NMI= %.4f, ARI= %.4f' % (acc, nmi, ari))
+        print(f"ACC= {acc:.4f}, NMI= {nmi:.4f}, ARI= {ari:.4f}")

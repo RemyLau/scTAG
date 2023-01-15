@@ -47,7 +47,7 @@ class SCTAG(tf.keras.Model):
         z_mean = TAGConv(channels=latent_dim, kernel_initializer=initializer)([h, A_in])
 
         self.encoder = Model(inputs=[X_input, A_in], outputs=z_mean, name="encoder")
-        clustering_layer = ClusteringLayer(name='clustering')(z_mean)
+        clustering_layer = ClusteringLayer(name="clustering")(z_mean)
         self.cluster_model = Model(inputs=[X_input, A_in], outputs=clustering_layer, name="cluster_encoder")
 
         # Adjacency matrix decoder
@@ -63,9 +63,9 @@ class SCTAG(tf.keras.Model):
         h = Dense(units=dec_dim[1], activation="relu")(h)
         h = Dense(units=dec_dim[2], activation="relu")(h)
 
-        pi = Dense(units=self.in_dim, activation='sigmoid', kernel_initializer='glorot_uniform', name='pi')(h)
-        disp = Dense(units=self.in_dim, activation=DispAct, kernel_initializer='glorot_uniform', name='dispersion')(h)
-        mean = Dense(units=self.in_dim, activation=MeanAct, kernel_initializer='glorot_uniform', name='mean')(h)
+        pi = Dense(units=self.in_dim, activation="sigmoid", kernel_initializer="glorot_uniform", name="pi")(h)
+        disp = Dense(units=self.in_dim, activation=DispAct, kernel_initializer="glorot_uniform", name="dispersion")(h)
+        mean = Dense(units=self.in_dim, activation=MeanAct, kernel_initializer="glorot_uniform", name="mean")(h)
 
         # decx_out = Dense(units=self.in_dim)(h)
         self.decoderX = Model(inputs=decx_in, outputs=[pi, disp, mean], name="decoderX")
@@ -106,7 +106,7 @@ class SCTAG(tf.keras.Model):
 
     def alt_train(self, y, epochs=300, lr=5e-4, W_a=0.3, W_x=1, W_c=1.5, info_step=8, n_update=8, centers=None):
 
-        self.cluster_model.get_layer(name='clustering').clusters = centers
+        self.cluster_model.get_layer(name="clustering").clusters = centers
 
         # Training
         optimizer = tf.keras.optimizers.Adam(learning_rate=lr)

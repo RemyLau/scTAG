@@ -70,8 +70,8 @@ def normalize(adata, copy=True, highly_genes=None, filter_min_counts=True,
         adata = sc.read(adata)
     else:
         raise NotImplementedError
-    norm_error = 'Make sure that the dataset (adata.X) contains unnormalized count data.'
-    assert 'n_count' not in adata.obs, norm_error
+    norm_error = "Make sure that the dataset (adata.X) contains unnormalized count data."
+    assert "n_count" not in adata.obs, norm_error
     if adata.X.size < 50e6:  # check if adata.X is integer only if array is small
         if sp.sparse.issparse(adata.X):
             assert (adata.X.astype(int) != adata.X).nnz == 0, norm_error
@@ -87,9 +87,9 @@ def normalize(adata, copy=True, highly_genes=None, filter_min_counts=True,
         adata.raw = adata
     if size_factors:
         sc.pp.normalize_per_cell(adata)
-        adata.obs['size_factors'] = adata.obs.n_counts / np.median(adata.obs.n_counts)
+        adata.obs["size_factors"] = adata.obs.n_counts / np.median(adata.obs.n_counts)
     else:
-        adata.obs['size_factors'] = 1.0
+        adata.obs["size_factors"] = 1.0
     if logtrans_input:
         sc.pp.log1p(adata)
     if highly_genes is not None:

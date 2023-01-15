@@ -38,7 +38,7 @@ def poisson_loss(y_true, y_pred):
 
 
 class NB(object):
-    def __init__(self, theta=None, masking=False, scope='nbinom_loss/',
+    def __init__(self, theta=None, masking=False, scope="nbinom_loss/",
                  scale_factor=1.0, debug=False):
 
         # for numerical stability
@@ -70,12 +70,12 @@ class NB(object):
 
             if self.debug:
                 assert_ops = [
-                        tf.verify_tensor_all_finite(y_pred, 'y_pred has inf/nans'),
-                        tf.verify_tensor_all_finite(t1, 't1 has inf/nans'),
-                        tf.verify_tensor_all_finite(t2, 't2 has inf/nans')]
+                        tf.verify_tensor_all_finite(y_pred, "y_pred has inf/nans"),
+                        tf.verify_tensor_all_finite(t1, "t1 has inf/nans"),
+                        tf.verify_tensor_all_finite(t2, "t2 has inf/nans")]
 
-                tf.summary.histogram('t1', t1)
-                tf.summary.histogram('t2', t2)
+                tf.summary.histogram("t1", t1)
+                tf.summary.histogram("t2", t2)
 
                 with tf.control_dependencies(assert_ops):
                     final = t1 + t2
@@ -95,7 +95,7 @@ class NB(object):
 
 
 class ZINB(NB):
-    def __init__(self, pi, ridge_lambda=0.0, scope='zinb_loss/', **kwargs):
+    def __init__(self, pi, ridge_lambda=0.0, scope="zinb_loss/", **kwargs):
         super().__init__(scope=scope, **kwargs)
         self.pi = pi
         self.ridge_lambda = ridge_lambda
@@ -105,7 +105,7 @@ class ZINB(NB):
         eps = self.eps
 
         with tf.name_scope(self.scope):
-            # reuse existing NB neg.log.lik.
+            # reuse existing NB negative log liklihood
             # mean is always False here, because everything is calculated
             # element-wise. we take the mean only in the end
             nb_case = super().loss(y_true, y_pred, mean=False) - tf.log(1.0-self.pi+eps)
@@ -129,10 +129,10 @@ class ZINB(NB):
             result = _nan2inf(result)
 
             if self.debug:
-                tf.summary.histogram('nb_case', nb_case)
-                tf.summary.histogram('zero_nb', zero_nb)
-                tf.summary.histogram('zero_case', zero_case)
-                tf.summary.histogram('ridge', ridge)
+                tf.summary.histogram("nb_case", nb_case)
+                tf.summary.histogram("zero_nb", zero_nb)
+                tf.summary.histogram("zero_case", zero_case)
+                tf.summary.histogram("ridge", ridge)
 
         return result
 

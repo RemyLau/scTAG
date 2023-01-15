@@ -7,8 +7,8 @@ from tensorflow.keras.layers import InputSpec, Layer
 
 class ClusteringLayer(Layer):
     def __init__(self, weights=None, alpha=1.0, **kwargs):
-        if 'input_shape' not in kwargs and 'input_dim' in kwargs:
-            kwargs['input_shape'] = (kwargs.pop('input_dim'),)
+        if "input_shape" not in kwargs and "input_dim" in kwargs:
+            kwargs["input_shape"] = (kwargs.pop("input_dim"),)
         super(ClusteringLayer, self).__init__(**kwargs)
         self.alpha = alpha
         self.initial_weights = weights
@@ -18,7 +18,7 @@ class ClusteringLayer(Layer):
         assert len(input_shape) == 2
         input_dim = input_shape[1]
         self.input_spec = InputSpec(dtype=K.floatx(), shape=(None, input_dim))
-        self.clusters = self.add_weight(shape=None, initializer='glorot_uniform', name='clusters')
+        self.clusters = self.add_weight(shape=None, initializer="glorot_uniform", name="clusters")
         if self.initial_weights is not None:
             self.set_weights(self.initial_weights)
             del self.initial_weights
@@ -35,7 +35,7 @@ class ClusteringLayer(Layer):
         return input_shape[0], self.n_clusters
 
     def get_config(self):
-        config = {'n_clusters': self.n_clusters}
+        config = {"n_clusters": self.n_clusters}
         base_config = super(ClusteringLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -46,8 +46,8 @@ class Bilinear(Layer):
                  dropout=0,
                  use_bias=False,
                  activation=None,
-                 kernel_initializer='glorot_uniform',
-                 bias_initializer='zeros',
+                 kernel_initializer="glorot_uniform",
+                 bias_initializer="zeros",
                  kernel_regularizer=None,
                  bias_regularizer=None,
                  activity_regularizer=None,
@@ -71,13 +71,13 @@ class Bilinear(Layer):
     def build(self, input_shapes):
         self.kernel = self.add_weight(shape=(input_shapes[-1], input_shapes[-1]),
                                       initializer=self.kernel_initializer,
-                                      name='kernel',
+                                      name="kernel",
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         if self.use_bias:
             self.bias = self.add_weight(shape=(self.units,),
                                         initializer=self.bias_initializer,
-                                        name='bias',
+                                        name="bias",
                                         regularizer=self.bias_regularizer,
                                         constraint=self.bias_constraint)
         else:

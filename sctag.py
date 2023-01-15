@@ -97,10 +97,11 @@ class SCTAG(tf.keras.Model):
             optimizer.apply_gradients(zip(grads, vars))
             if epoch % info_step == 0:
                 if W_d:
-                    print("Epoch", epoch, " zinb_loss:", zinb_loss.numpy(), "  A_rec_loss:", A_rec_loss.numpy(),
-                          "  Dist_loss:", Dist_loss.numpy())
+                    print(f"Epoch: {epoch:>4d} zinb_loss: {zinb_loss.numpy():>7.4f} "
+                          f"rec_loss: {A_rec_loss.numpy():>7.4f} dist_loss: {Dist_loss.numpy():>7.4f}")
                 else:
-                    print("Epoch", epoch, " zinb_loss:", zinb_loss.numpy(), "  A_rec_loss:", A_rec_loss.numpy())
+                    print(f"Epoch: {epoch:>4d} zinb_loss: {zinb_loss.numpy():>7.4f} "
+                          f"rec_loss: {A_rec_loss.numpy():>7.4f}")
 
         print("Pre_train Finish!")
 
@@ -134,8 +135,8 @@ class SCTAG(tf.keras.Model):
             optimizer.apply_gradients(zip(grads, vars))
 
             if epoch % info_step == 0:
-                print("Epoch", epoch, " zinb_loss: ", zinb_loss.numpy(), " A_rec_loss: ", A_rec_loss.numpy(),
-                      " cluster_loss: ", cluster_loss.numpy())
+                print(f"Epoch: {epoch:>4d} zinb_loss: {zinb_loss.numpy():>7.4f} ",
+                      f"rec_loss {A_rec_loss.numpy():>7.4f} cluster_loss: {cluster_loss.numpy():>7.4f}")
 
         tf.compat.v1.disable_eager_execution()
         q = tf.constant(q)

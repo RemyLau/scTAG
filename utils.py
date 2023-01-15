@@ -51,9 +51,7 @@ def minibatch(batch_size, desc, use_last=False, progress_bar=True):
         def wrapped_func(*args, **kwargs):
             total_size = args[0].shape[0]
             if use_last:
-                n_batch = np.ceil(
-                    total_size / float(batch_size)
-                ).astype(np.int)
+                n_batch = np.ceil(total_size / float(batch_size)).astype(int)
             else:
                 n_batch = max(1, np.floor(
                     total_size / float(batch_size)

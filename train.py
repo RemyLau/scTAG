@@ -7,10 +7,12 @@ import scanpy as sc
 import tensorflow as tf
 from numpy.random import seed
 from sklearn import metrics
+from sklearn.cluster import SpectralClustering
 
 from graph_function import get_adj
 from preprocess import normalize, prepro
 from sctag import SCTAG
+from linear_assignment import linear_assignment
 
 seed(1)
 tf.random.set_seed(1)
@@ -41,7 +43,6 @@ def cluster_acc(y_true, y_pred):
     w = np.zeros((D, D), dtype=np.int64)
     for i in range(y_pred.size):
         w[y_pred[i], y_true[i]] += 1
-    from sklearn.utils.linear_assignment_ import linear_assignment
     ind = linear_assignment(w.max() - w)
     return sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_option
     x, y = prepro("./data/" + args.dataname + "/data.h5")
 
-    x = np.ceil(x).astype(np.int)
+    x = np.ceil(x).astype(int)
     cluster_number = int(max(y) - min(y) + 1)
     adata = sc.AnnData(x)
     adata.obs["Group"] = y
@@ -80,7 +81,6 @@ if __name__ == "__main__":
     model.pre_train(epochs=args.pretrain_epochs)
 
     Y = model.embedding(count, adj_n)
-    from sklearn.cluster import SpectralClustering
     labels = SpectralClustering(n_clusters=cluster_number, affinity="precomputed",
                                 assign_labels="discretize", random_state=0).fit_predict(adj)
     centers = computeCentroids(Y, labels)
